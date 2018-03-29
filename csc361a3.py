@@ -6,10 +6,10 @@
 '
 '''
 
+from collections import OrderedDict
 import dpkt 
 import socket 
 import sys
-from collections import OrderedDict
 
 protocols = ([])
 

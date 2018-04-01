@@ -11,20 +11,23 @@ import dpkt
 import socket 
 import sys
 
-protocols = ([])
-
 def displaySrcIP(ip_src):
-    print("IP Address of the source node: %s" % ip_src)
+    print("The IP Address of the source node: %s" % ip_src)
 
 def displayUltDstIP(ip_ult_dst):
-    print("IP Address of the ultimate destination node: %s" % ip_ult_dst)
+    print("The IP Address of the ultimate destination node: %s" % ip_ult_dst)
 
 def displayIntDstIP(ip_int_dst):
-    print("IP Address of the intermediate destination nodes: ")
+    print("The IP Address of the intermediate destination nodes: ")
     count = 1 
     for entry in ip_int_dst:
-        print("    router %d: %s" % (count, entry))
+        print("        router %d: %s" % (count, entry))
         count += 1
+
+def displayProtocols(protocols):
+    print("The values in the protocol field of the IP headers:")
+    for entry in protocols:
+        print("        " + entry)
 
 def main(argv):
     print("CSC361 Assingment 3")
@@ -32,6 +35,7 @@ def main(argv):
     ip_src = None 
     ip_ult_dst = None
     ip_int_dst = []
+    protocols = []
 
     f = open(argv[1], "rb")
     pcap = dpkt.pcap.Reader(f)
@@ -49,13 +53,16 @@ def main(argv):
             src_host = socket.inet_ntoa(ip.src) 
             dst_host = socket.inet_ntoa(ip.dst) 
 
+            if ip.ttl == 1 and ip_src == None and ip_ult_dst == None:
+                ip_src = src_host
+                ip_ult_dst = dst_host
+                # Print output to console
+                displaySrcIP(src_host)
+                displayUltDstIP(dst_host)
+
             if tcp.type == 8:
-                if ip.ttl == 1 and ip_src == None and ip_ult_dst == None:
-                    ip_src = src_host
-                    ip_ult_dst = dst_host
-                    # Print output to console
-                    displaySrcIP(src_host)
-                    displayUltDstIP(dst_host)
+                if ip.icmp != None:
+                    protocols.append("%d: ICMP" % ip.p)   
             elif tcp.type == 11:
                 ip_int_dst.append(src_host)
         except (AttributeError, OSError) as e:
@@ -64,6 +71,9 @@ def main(argv):
     ip_int_dst = list(OrderedDict.fromkeys(ip_int_dst))
     # Print output to console
     displayIntDstIP(ip_int_dst)
+
+    protocols = list(OrderedDict.fromkeys(protocols))
+    displayProtocols(protocols)
 
 '''
         try:

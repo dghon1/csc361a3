@@ -36,6 +36,12 @@ def displayProtocols(protocols):
     for entry in protocols:
         print("        " + entry)
 
+def displayFrag():
+    num_frag = 0
+    last_frag = 0
+    print("The number of fragments created from the original datagram is: %d" % num_frag)
+    print("The offset of the last fragment is: %d" % last_frag)
+
 def displayRTT(time_recieved, time_sent, src_ip):
     averages = []
     rtt = []
@@ -55,16 +61,14 @@ def displayRTT(time_recieved, time_sent, src_ip):
         for trip in rtt:
             if trip.ip == thing:
                 same_ip.append(trip.ts)
-        result_mean = sum(same_ip)/float(len(same_ip))
-        result_std = statistics.stdev(same_ip)
+        result_mean = round((sum(same_ip)/float(len(same_ip)))*1000, 2)
+        result_std = round(statistics.stdev(same_ip)*1000, 2)
         averages.append(RoundTripTime(result_std, thing, result_mean))
     
     for entry in averages:
-        print("The average RTT between %s and %s is: %s, the s.d. is: %s" % (src_ip, entry.ip, entry.ts, entry.seq))
+        print("The average RTT between %s and %s is: %s ms, the s.d. is: %s ms" % (src_ip, entry.ip, entry.ts, entry.seq))
 
 def main(argv):
-    print("CSC361 Assingment 3")
-
     ip_src = None 
     ip_ult_dst = None
     ip_int_dst = []
@@ -117,11 +121,16 @@ def main(argv):
     ip_int_dst = list(OrderedDict.fromkeys(ip_int_dst))
     # Print output to console
     displayIntDstIP(ip_int_dst)
+    print()
 
     # Removes duplicate protocols from the list
     protocols = list(OrderedDict.fromkeys(protocols))
     # Prints the used protocols to the console
     displayProtocols(protocols)
+    print()
+
+    displayFrag()
+    print()
 
     displayRTT(time_recieved, time_sent, src_host)
 

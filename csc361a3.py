@@ -9,6 +9,7 @@
 from collections import OrderedDict
 import dpkt 
 import socket 
+import statistics
 import sys
 
 class RoundTripTime:
@@ -54,11 +55,12 @@ def displayRTT(time_recieved, time_sent, src_ip):
         for trip in rtt:
             if trip.ip == thing:
                 same_ip.append(trip.ts)
-        result = sum(same_ip)/float(len(same_ip))
-        averages.append(RoundTripTime(None, thing, result))
+        result_mean = sum(same_ip)/float(len(same_ip))
+        result_std = statistics.stdev(same_ip)
+        averages.append(RoundTripTime(result_std, thing, result_mean))
     
     for entry in averages:
-        print("The average RTT between %s and %s is: %s," % (src_ip, entry.ip, entry.ts))
+        print("The average RTT between %s and %s is: %s, the s.d. is: %s" % (src_ip, entry.ip, entry.ts, entry.seq))
 
 def main(argv):
     print("CSC361 Assingment 3")
